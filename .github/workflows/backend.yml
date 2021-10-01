@@ -28,7 +28,7 @@ jobs:
         with:
           push: true
           context: backend/
-          tags: lopatyn1244/frontend:latest
+          tags: lopatyn1244/foodgram-frontend:latest
 
   deploy:
     if: github.ref == 'refs/heads/master'
@@ -43,7 +43,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull lopatyn1244/frontend:latest
+            sudo docker pull lopatyn1244/foodgram-frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
             sudo docker-compose -f docker-compose.yml up -d
