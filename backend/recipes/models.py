@@ -5,29 +5,14 @@ from django.db import models
 User = get_user_model()
 
 
-class Ingredient(models.Model):
-    name = models.CharField(max_length=200, null=False, blank=False,
-                            verbose_name='Название')
-    measurement_unit = models.CharField(max_length=200, null=False,
-                                        blank=False,
-                                        verbose_name='Мера измерения')
-
-    class Meta:
-        ordering = ('name',)
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-
-    def __str__(self):
-        return self.name
-
-
 class Tag(models.Model):
     name = models.CharField(max_length=200, unique=True, null=False,
-                            blank=False, verbose_name='Название')
+                            blank=False, verbose_name='Название тега')
     color = models.CharField(max_length=7, unique=True, null=False,
                              blank=False, verbose_name='Цвет')
     slug = models.CharField(max_length=200, unique=True, null=False,
-                            blank=False, verbose_name='Слаг')
+                            help_text='Введите уникальный слаг',
+                            blank=False, verbose_name='Уникальный слаг')
 
     class Meta:
         ordering = ('name',)
@@ -38,14 +23,34 @@ class Tag(models.Model):
         return self.name
 
 
+class Ingredient(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False,
+                            help_text='Введите название ингредиента',
+                            verbose_name='Название ингредиента')
+    measurement_unit = models.CharField(max_length=200, null=False,
+                                        help_text='Выберите меру измерения',
+                                        blank=False, verbose_name='Мера измерения')
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
+
+
 class Recipe(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False,
-                            verbose_name='Название')
+                            verbose_name='Название рецепта',
+                            help_text='Введите название рецепта')
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='recipes',
-                               verbose_name='Автор')
+                               verbose_name='Автор',
+                               help_text='Выберите автора')
     text = models.TextField(blank=False, null=False,
-                            verbose_name='Описание')
+                            verbose_name='Описание',
+                            help_text='Введите название ингредиента')
     tags = models.ManyToManyField(Tag, through='RecipeTags')
     ingredients = models.ManyToManyField(Ingredient,
                                          through='RecipeIngredients')
@@ -101,11 +106,11 @@ class Favorite(models.Model):
                                verbose_name='Рецепт')
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
-                                               name='unique_recipe_in_user_favorite')]
         ordering = ('-id',)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+        constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
+                                               name='unique_recipe_in_user_favorite')]
 
 
 class ShoppingList(models.Model):
