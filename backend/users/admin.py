@@ -12,10 +12,10 @@ class UserAdmin(DjangoUserAdmin):
     list_filter = ['email', 'username']
 
 
+admin.site.register(User, DjangoUserAdmin)
+
+
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
     list_display = ('pk', 'user', 'following')
     list_filter = ['user', 'following']
-
-
-admin.site.register(User, DjangoUserAdmin)
