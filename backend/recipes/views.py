@@ -5,7 +5,6 @@ from rest_framework import mixins, permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-# from backend.pagination import CustomPageNumberPaginator
 
 from .filters import IngredientsFilter, RecipeFilter
 from .models import (Ingredient, RecipeIngredients, Tag,
