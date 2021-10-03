@@ -4,8 +4,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-# from rest_framework.pagination import PageNumberPagination
-from backend.pagination import CustomPageNumberPaginator
+from rest_framework.pagination import PageNumberPagination
+# from backend.pagination import CustomPageNumberPaginator
 
 from .filters import IngredientsFilter, RecipeFilter
 from .models import (Ingredient, RecipeIngredients, Tag,
@@ -44,7 +44,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = ShowRecipeFullSerializer
     permission_classes = [IsAuthorOrAdmin]
     filter_backends = [DjangoFilterBackend]
-    pagination_class = CustomPageNumberPaginator
+    pagination_class = PageNumberPagination
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
