@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+# from rest_framework.pagination import PageNumberPagination
 from backend.pagination import CustomPageNumberPaginator
 
 from .filters import IngredientsFilter, RecipeFilter
@@ -28,8 +28,8 @@ class IngredientsViewSet(RetriveAndListViewSet):
     serializer_class = IngredientsSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = IngredientsFilter
     pagination_class = None
+    filterset_class = IngredientsFilter
 
 
 class TagsViewSet(RetriveAndListViewSet):
@@ -44,8 +44,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = ShowRecipeFullSerializer
     permission_classes = [IsAuthorOrAdmin]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = RecipeFilter
     pagination_class = CustomPageNumberPaginator
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -90,33 +90,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         user_shopping_list = request.user.shopping_list.all()
-        to_buy = get_ingredients_list(user_shopping_list)
-        return download_file_response(to_buy, 'to_buy.txt')
+        ingredients = {}
+        for recipe in user_shopping_list:
+            ingredient_filter = RecipeIngredients.objects.filter(recipe=recipe.recipe)
+            for ingredient in ingredient_filter:
+                amount = ingredient.amount
+                name = ingredient.ingredient.name
+                measurement_unit = ingredient.ingredient.measurement_unit
+                if name not in ingredients:
+                    ingredients[name] = {
+                        'measurement_unit': measurement_unit,
+                        'amount': amount
+                    }
+                else:
+                    ingredients[name]['amount'] += amount
+        purchase = []
+        for item in ingredients:
+            purchase.append(f'{item} - {ingredients[item]["amount"]} '
+                          f'{ingredients[item]["measurement_unit"]} \n')
+        response = HttpResponse(purchase, 'Content-Type: text/plain')
+        response['Content-Disposition'] = f'attachment; filename=purchase.txt'
+        return response
 
-
-def get_ingredients_list(recipes_list):
-    ingredients_dict = {}
-    for recipe in recipes_list:
-        ingredients = RecipeIngredients.objects.filter(recipe=recipe.recipe)
-        for ingredient in ingredients:
-            amount = ingredient.amount
-            name = ingredient.ingredient.name
-            measurement_unit = ingredient.ingredient.measurement_unit
-            if name not in ingredients_dict:
-                ingredients_dict[name] = {
-                    'measurement_unit': measurement_unit,
-                    'amount': amount
-                }
-            else:
-                ingredients_dict[name]['amount'] += amount
-    to_buy = []
-    for item in ingredients_dict:
-        to_buy.append(f'{item} - {ingredients_dict[item]["amount"]} '
-                      f'{ingredients_dict[item]["measurement_unit"]} \n')
-    return to_buy
-
-
-def download_file_response(list_to_download, filename):
-    response = HttpResponse(list_to_download, 'Content-Type: text/plain')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response

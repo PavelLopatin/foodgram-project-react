@@ -6,7 +6,6 @@ from recipes.models import Recipe
 
 from .models import Follow
 
-
 User = get_user_model()
 
 
@@ -46,21 +45,19 @@ class FollowSerializer(serializers.ModelSerializer):
         if Follow.objects.filter(user=user,
                                  following__id=following_id).exists():
             raise serializers.ValidationError(
-                    'Вы уже подписаны на этого пользователя')
+                'Вы уже подписаны на этого пользователя')
         if user.id == following_id:
             raise serializers.ValidationError('Нельзя подписаться на себя')
         return data
 
 
 class FollowingRecipesSerializers(serializers.ModelSerializer):
-
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class ShowFollowSerializer(serializers.ModelSerializer):
-
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
