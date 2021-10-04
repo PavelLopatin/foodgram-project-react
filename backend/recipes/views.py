@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -82,25 +83,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
-        user_shopping_list = request.user.shopping_list.all()
-        ingredients = {}
-        for recipe in user_shopping_list:
-            ingredient_filter = RecipeIngredient.objects.filter(recipe=recipe.recipe)
-            for ingredient in ingredient_filter:
-                amount = ingredient.amount
-                name = ingredient.ingredient.name
-                measurement_unit = ingredient.ingredient.measurement_unit
-                if name not in ingredients:
-                    ingredients[name] = {
-                        'measurement_unit': measurement_unit,
-                        'amount': amount
-                    }
-                else:
-                    ingredients[name]['amount'] += amount
+        ingredients = request.user.shopping_list.all().values_list(
+            'recipe__ingredients__name',
+            'recipe__ingredients__recipeingredient__amount',
+            'recipe__ingredients__measurement_unit')
+        shopping_list = {}
+        for ingredient in ingredients:
+            name = ingredient[0]
+            amount = ingredient[1]
+            measurement_unit = ingredient[2]
+            if name not in shopping_list:
+                shopping_list[name] = {
+                    'measurement_unit': measurement_unit,
+                    'amount': amount
+                }
+            else:
+                shopping_list[name]['amount'] += amount
         purchase = []
-        for item in ingredients:
-            purchase.append(f'{item} - {ingredients[item]["amount"]} '
-                            f'{ingredients[item]["measurement_unit"]} \n')
+        for item in shopping_list:
+            purchase.append(f'{item} - {shopping_list[item]["amount"]} '
+                            f'{shopping_list[item]["measurement_unit"]} \n')
         response = HttpResponse(purchase, 'Content-Type: text/plain')
         response['Content-Disposition'] = f'attachment; filename=purchase.txt'
         return response
