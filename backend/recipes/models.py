@@ -6,13 +6,13 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=200, unique=True, null=False,
-                            blank=False, verbose_name='Название тега')
-    color = models.CharField(max_length=7, unique=True, null=False,
-                             blank=False, verbose_name='Цвет')
-    slug = models.CharField(max_length=200, unique=True, null=False,
+    name = models.CharField(max_length=200, unique=True,
+                            verbose_name='Название тега')
+    color = models.CharField(max_length=7, unique=True,
+                             verbose_name='Цвет')
+    slug = models.CharField(max_length=200, unique=True,
                             help_text='Введите уникальный слаг',
-                            blank=False, verbose_name='Уникальный слаг')
+                            verbose_name='Уникальный слаг')
 
     class Meta:
         ordering = ('name',)
@@ -24,12 +24,12 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=200, null=False, blank=False,
+    name = models.CharField(max_length=200,
                             help_text='Введите название ингредиента',
                             verbose_name='Название ингредиента')
-    measurement_unit = models.CharField(max_length=200, null=False,
+    measurement_unit = models.CharField(max_length=200,
                                         help_text='Выберите меру измерения',
-                                        blank=False, verbose_name='Мера измерения')
+                                        verbose_name='Мера измерения')
 
     class Meta:
         ordering = ('name',)
@@ -41,23 +41,22 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    name = models.CharField(max_length=200, blank=False, null=False,
+    name = models.CharField(max_length=200,
                             verbose_name='Название рецепта',
                             help_text='Введите название рецепта')
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='recipes',
                                verbose_name='Автор',
                                help_text='Выберите автора')
-    text = models.TextField(blank=False, null=False,
-                            verbose_name='Описание',
+    text = models.TextField(verbose_name='Описание',
                             help_text='Введите название ингредиента')
-    tags = models.ManyToManyField(Tag, through='RecipeTags')
+    tags = models.ManyToManyField(Tag, through='RecipeTag')
     ingredients = models.ManyToManyField(Ingredient,
-                                         through='RecipeIngredients')
+                                         through='RecipeIngredient')
     cooking_time = models.PositiveIntegerField(
         validators=[MinValueValidator(1)],
         verbose_name='Время готовки')
-    image = models.ImageField(upload_to='recipes/images', blank=False, null=False,
+    image = models.ImageField(upload_to='recipes/images',
                               verbose_name='Фото рецепта')
 
     class Meta:
@@ -69,7 +68,7 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeIngredients(models.Model):
+class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT,
                                    verbose_name='Ингредиент')
@@ -79,12 +78,15 @@ class RecipeIngredients(models.Model):
     class Meta:
         verbose_name = 'Ингредиенты'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'], name='unique_ingredient')]
 
     def __str__(self):
         return 'Ингредиент в рецепте'
 
 
-class RecipeTags(models.Model):
+class RecipeTag(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE,
                             verbose_name='Тег')
@@ -109,8 +111,9 @@ class Favorite(models.Model):
         ordering = ('-id',)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
-                                               name='unique_recipe_in_user_favorite')]
+        constraints = [models.UniqueConstraint(
+            fields=['user', 'recipe'],
+            name='unique_recipe_in_user_favorite')]
 
 
 class ShoppingList(models.Model):

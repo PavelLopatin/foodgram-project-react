@@ -1,25 +1,19 @@
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, permissions, viewsets, status
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 from .filters import IngredientsFilter, RecipeFilter
-from .models import (Ingredient, RecipeIngredients, Tag,
-                     Recipe, Favorite, ShoppingList)
-from .serializers import (IngredientsSerializer, TagsSerializer,
-                          ShowRecipeFullSerializer, AddRecipeSerializer,
-                          FavouriteSerializer, ShoppingListSerializer)
+from .mixins import RetriveAndListViewSet
+from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingList, Tag)
 from .permissions import IsAuthorOrAdmin
-
-
-class RetriveAndListViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet):
-    pass
+from .serializers import (AddRecipeSerializer, FavouriteSerializer,
+                          IngredientsSerializer, ShoppingListSerializer,
+                          ShowRecipeFullSerializer, TagsSerializer)
 
 
 class IngredientsViewSet(RetriveAndListViewSet):
@@ -91,7 +85,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user_shopping_list = request.user.shopping_list.all()
         ingredients = {}
         for recipe in user_shopping_list:
-            ingredient_filter = RecipeIngredients.objects.filter(recipe=recipe.recipe)
+            ingredient_filter = RecipeIngredient.objects.filter(recipe=recipe.recipe)
             for ingredient in ingredient_filter:
                 amount = ingredient.amount
                 name = ingredient.ingredient.name
@@ -106,8 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         purchase = []
         for item in ingredients:
             purchase.append(f'{item} - {ingredients[item]["amount"]} '
-                          f'{ingredients[item]["measurement_unit"]} \n')
+                            f'{ingredients[item]["measurement_unit"]} \n')
         response = HttpResponse(purchase, 'Content-Type: text/plain')
         response['Content-Disposition'] = f'attachment; filename=purchase.txt'
         return response
-

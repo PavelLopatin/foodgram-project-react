@@ -5,8 +5,8 @@ from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 from users.serializers import CustomUserSerializer
 
-from .models import (Ingredient, Tag, Recipe, RecipeIngredients,
-                     Favorite, ShoppingList)
+from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingList, Tag)
 
 User = get_user_model()
 
@@ -27,10 +27,10 @@ class ShowRecipeIngredientsSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
-                       source='ingredient.measurement_unit')
+        source='ingredient.measurement_unit')
 
     class Meta:
-        model = RecipeIngredients
+        model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
@@ -54,7 +54,7 @@ class ShowRecipeFullSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart')
 
     def get_ingredients(self, obj):
-        ingredients = RecipeIngredients.objects.filter(recipe=obj)
+        ingredients = RecipeIngredient.objects.filter(recipe=obj)
         return ShowRecipeIngredientsSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
@@ -76,7 +76,7 @@ class AddRecipeIngredientsSerializer(serializers.ModelSerializer):
     amount = serializers.IntegerField()
 
     class Meta:
-        model = RecipeIngredients
+        model = RecipeIngredient
         fields = ('id', 'amount')
 
 
@@ -93,13 +93,17 @@ class AddRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'ingredients', 'name',
                   'image', 'text', 'cooking_time')
 
-    def validate_ingredients(self, data):
+    def validate_ingredisents(self, data):
         ingredients = self.initial_data.get('ingredients')
-        if ingredients == []:
-            raise ValidationError('Нужно выбрать минимум 1 ингридиент!')
+        ingredients_set = set()
+        if not ingredients:
+            raise ValidationError('Нужно выбрать хотя бы один ингредиент!')
         for ingredient in ingredients:
+            if ingredient in ingredients_set:
+                raise ValidationError('Вы уже добавили этот ингредиент!')
             if int(ingredient['amount']) <= 0:
-                raise ValidationError('Количество должно быть положительным!')
+                raise ValidationError('Количество должно быть положительными!')
+            ingredients_set.add(ingredient)
         return data
 
     def validate_cooking_time(self, data):
@@ -112,10 +116,10 @@ class AddRecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
             amount = ingredient['amount']
-            if RecipeIngredients.objects.\
-               filter(recipe=recipe, ingredient=ingredient_id).exists():
+            if (RecipeIngredient.objects.
+                    filter(recipe=recipe, ingredient=ingredient_id).exists()):
                 amount += F('amount')
-            RecipeIngredients.objects.update_or_create(
+            RecipeIngredient.objects.update_or_create(
                 recipe=recipe, ingredient=ingredient_id,
                 defaults={'amount': amount})
 
@@ -146,7 +150,7 @@ class AddRecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, recipe):
         data = ShowRecipeSerializer(recipe, context={'request':
-                                    self.context.get('request')}).data
+                                                         self.context.get('request')}).data
         return data
 
 
