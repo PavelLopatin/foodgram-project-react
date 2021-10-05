@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
+
+from recipes.paginators import CustomPageNumberPaginator
 
 from .models import Follow
 from .serializers import FollowSerializer, ShowFollowSerializer
@@ -34,7 +35,7 @@ class ListFollowViewSet(generics.ListAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ShowFollowSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPaginator
 
     def get_queryset(self):
         user = self.request.user

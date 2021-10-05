@@ -4,17 +4,17 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from .filters import IngredientsFilter, RecipeFilter
 from .mixins import RetriveAndListViewSet
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+from .models import (Favorite, Ingredient, Recipe,
                      ShoppingList, Tag)
 from .permissions import IsAuthorOrAdmin
 from .serializers import (AddRecipeSerializer, FavouriteSerializer,
                           IngredientsSerializer, ShoppingListSerializer,
                           ShowRecipeFullSerializer, TagsSerializer)
+from .paginators import CustomPageNumberPaginator
 
 
 class IngredientsViewSet(RetriveAndListViewSet):
@@ -38,7 +38,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = ShowRecipeFullSerializer
     permission_classes = [IsAuthorOrAdmin]
     filter_backends = [DjangoFilterBackend]
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPaginator
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):

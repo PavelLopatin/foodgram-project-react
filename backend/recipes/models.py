@@ -94,6 +94,8 @@ class RecipeTag(models.Model):
     class Meta:
         verbose_name = 'Теги'
         verbose_name_plural = 'Теги'
+        constraints = [models.UniqueConstraint(
+            fields=['recipe', 'tag'], name='unique_tag')]
 
     def __str__(self):
         return 'Тег рецепта'
@@ -124,8 +126,9 @@ class ShoppingList(models.Model):
                                verbose_name='Рецепт')
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
-                                               name='unique_recipe_in_user_shopping_list')]
+        constraints = [models.UniqueConstraint(
+            fields=['user', 'recipe'],
+            name='unique_recipe_in_user_shopping_list')]
         ordering = ('-id',)
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
