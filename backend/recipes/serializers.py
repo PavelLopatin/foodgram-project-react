@@ -13,19 +13,19 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
 User = get_user_model()
 
 
-class IngredientsSerializer(serializers.ModelSerializer):
+class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
 
-class TagsSerializer(serializers.ModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
 
 
-class ShowRecipeIngredientsSerializer(serializers.ModelSerializer):
+class ShowRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -43,7 +43,7 @@ class ShowRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShowRecipeFullSerializer(serializers.ModelSerializer):
-    tags = TagsSerializer(many=True, read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
@@ -57,7 +57,7 @@ class ShowRecipeFullSerializer(serializers.ModelSerializer):
 
     def get_ingredients(self, obj):
         ingredients = RecipeIngredient.objects.filter(recipe=obj)
-        return ShowRecipeIngredientsSerializer(ingredients, many=True).data
+        return ShowRecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
@@ -73,7 +73,7 @@ class ShowRecipeFullSerializer(serializers.ModelSerializer):
                                            user=request.user).exists()
 
 
-class AddRecipeIngredientsSerializer(serializers.ModelSerializer):
+class AddRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField()
 
@@ -85,7 +85,7 @@ class AddRecipeIngredientsSerializer(serializers.ModelSerializer):
 class AddRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
-    ingredients = AddRecipeIngredientsSerializer(many=True)
+    ingredients = AddRecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
                                               many=True)
     cooking_time = serializers.IntegerField()

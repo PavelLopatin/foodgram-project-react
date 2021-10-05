@@ -6,28 +6,28 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .filters import IngredientsFilter, RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .mixins import RetriveAndListViewSet
 from .models import Favorite, Ingredient, Recipe, ShoppingList, Tag
 from .paginators import CustomPageNumberPaginator
 from .permissions import IsAuthorOrAdmin
 from .serializers import (AddRecipeSerializer, FavouriteSerializer,
-                          IngredientsSerializer, ShoppingListSerializer,
-                          ShowRecipeFullSerializer, TagsSerializer)
+                          IngredientSerializer, ShoppingListSerializer,
+                          ShowRecipeFullSerializer, TagSerializer)
 
 
-class IngredientsViewSet(RetriveAndListViewSet):
+class IngredientViewSet(RetriveAndListViewSet):
     queryset = Ingredient.objects.all()
-    serializer_class = IngredientsSerializer
+    serializer_class = IngredientSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
     pagination_class = None
-    filterset_class = IngredientsFilter
+    filterset_class = IngredientFilter
 
 
-class TagsViewSet(RetriveAndListViewSet):
+class TagViewSet(RetriveAndListViewSet):
     queryset = Tag.objects.all()
-    serializer_class = TagsSerializer
+    serializer_class = TagSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
