@@ -52,7 +52,7 @@ docker-compose exec backend python manage.py createsuperuser
 ```
 Загрузка фикстур
 ```
-docker exec backend python manage.py loaddata fixtures.json
+docker exec backend python manage.py loaddata data/fixtures.json
 ```
 После сборки, проект будет доступен по имени хоста вашей машины, на которой был развернут проект.
 Проект доступен по адресу http://84.201.157.75/admin
