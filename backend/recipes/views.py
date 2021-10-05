@@ -8,13 +8,12 @@ from rest_framework.response import Response
 
 from .filters import IngredientsFilter, RecipeFilter
 from .mixins import RetriveAndListViewSet
-from .models import (Favorite, Ingredient, Recipe,
-                     ShoppingList, Tag)
+from .models import Favorite, Ingredient, Recipe, ShoppingList, Tag
+from .paginators import CustomPageNumberPaginator
 from .permissions import IsAuthorOrAdmin
 from .serializers import (AddRecipeSerializer, FavouriteSerializer,
                           IngredientsSerializer, ShoppingListSerializer,
                           ShowRecipeFullSerializer, TagsSerializer)
-from .paginators import CustomPageNumberPaginator
 
 
 class IngredientsViewSet(RetriveAndListViewSet):

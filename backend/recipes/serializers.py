@@ -110,12 +110,12 @@ class AddRecipeSerializer(serializers.ModelSerializer):
         tags = self.initial_data.get('tags')
         if len(tags) == 0:
             raise serializers.ValidationError('Нужно добавить один тег')
-        unique_id_tags = set()
+        unique_tags = set()
         for item in tags:
-            if item in unique_id_tags:
+            if item in unique_tags:
                 raise serializers.ValidationError('Нельзя добавлять '
                                                   'одинаковые теги')
-            unique_id_tags.add(item)
+            unique_tags.add(item)
         return data
 
     def validate_cooking_time(self, data):
