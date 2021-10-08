@@ -9,6 +9,7 @@ from .models import (
     Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingList, Tag,
 )
 
+
 User = get_user_model()
 
 
@@ -96,15 +97,15 @@ class AddRecipeSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, data):
         ingredients = self.initial_data.get('ingredients')
-        ingredients_set = set()
         if not ingredients:
-            raise ValidationError('Нужно выбрать хотя бы один ингредиент!')
+            raise ValidationError('Нужно выбрать минимум 1 ингредиент!')
         for ingredient in ingredients:
-            if ingredient in ingredients_set:
-                raise ValidationError('Вы уже добавили этот ингредиент!')
             if int(ingredient['amount']) <= 0:
-                raise ValidationError('Количество должно быть положительными!')
-            ingredients_set.add(ingredient)
+                raise ValidationError('Количество должно быть положительным!')
+        ingredients_count = len(ingredients)
+        ingredients_set = len(set([i['id'] for i in ingredients]))
+        if ingredients_count > ingredients_set:
+            raise ValidationError('Ингредиенты не должны повторяться')
         return data
 
     def validate_tags(self, data):
