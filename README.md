@@ -55,7 +55,7 @@ docker-compose exec backend python manage.py createsuperuser
 docker exec backend python manage.py loaddata data/fixtures.json
 ```
 После сборки, проект будет доступен по имени хоста вашей машины, на которой был развернут проект.
-Проект доступен по адресу http://84.201.157.75/admin
+Проект доступен по адресу http://84.201.157.75
 ### Вход на сайт/в админку:
 ```
 lopatyn1244@gmail.com
