@@ -59,5 +59,5 @@ docker exec backend python manage.py loaddata data/fixtures.json
 ### Вход на сайт/в админку:
 ```
 lopatyn1244@gmail.com
-lopatyn1244s
+lopatyn1244
 ```
