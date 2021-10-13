@@ -1,4 +1,4 @@
-# FOODGRAM PROJECT - [«Продуктовый помощник»](http://www.myrecipesfoodgram.ga/).
+# FOODGRAM PROJECT - [«Продуктовый помощник»](http://84.201.157.75/signin).
 ____
 [![Build Status](https://travis-ci.com/h0diush/foodgram-project-react.svg?branch=master)](https://travis-ci.com/h0diush/foodgram-project-react)
 
